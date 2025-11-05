@@ -1,0 +1,678 @@
+<!DOCTYPE html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mary Rich</title>
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
+      rel="stylesheet"
+    />
+    <link
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css"
+      rel="stylesheet"
+    />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/phaser/3.55.2/phaser.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/sweetalert2/11.7.18/sweetalert2.all.min.js"></script>
+    <style>
+      body {
+        background: linear-gradient(135deg, #1a1d23 0%, #2d3139 100%);
+        color: white;
+        font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
+        margin: 0;
+        padding: 0;
+        overflow-x: hidden;
+      }
+
+      .game-container {
+        max-width: 1200px;
+        margin: 0 auto;
+      }
+
+      canvas {
+        width: 100% !important;
+        height: auto !important;
+      }
+
+      .header {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        padding: 20px;
+        border-radius: 15px;
+        margin-bottom: 20px;
+        text-align: center;
+        box-shadow: 0 5px 20px rgba(102, 126, 234, 0.4);
+      }
+
+      .quiz-section {
+        background: #25282e;
+        border-radius: 15px;
+        padding: 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+        min-height: 300px;
+      }
+
+      .game-section {
+        background: #1a1d23;
+        border-radius: 15px;
+        padding: 10px;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
+      }
+
+      .option-btn {
+        background: #2d3139;
+        border: 2px solid #667eea;
+        color: white;
+        padding: 15px;
+        margin: 10px 0;
+        border-radius: 10px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        width: 100%;
+        text-align: left;
+        font-size: 1rem;
+      }
+
+      .option-btn:hover:not(:disabled) {
+        background: #667eea;
+        transform: translateX(10px);
+      }
+
+      .option-btn:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+
+      .option-btn.correct {
+        background: #10b981;
+        border-color: #10b981;
+      }
+
+      .option-btn.incorrect {
+        background: #ef4444;
+        border-color: #ef4444;
+      }
+
+      .health-bar-container {
+        position: relative;
+        height: 30px;
+        background: #1a1d23;
+        border-radius: 15px;
+        overflow: hidden;
+        border: 2px solid #667eea;
+      }
+
+      .health-bar {
+        height: 100%;
+        transition: width 0.5s ease;
+        border-radius: 13px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 15px;
+      }
+
+      .health-bar.player {
+        background: linear-gradient(90deg, #10b981, #34d399);
+      }
+
+      .health-bar.enemy {
+        background: linear-gradient(90deg, #ef4444, #f87171);
+      }
+
+      .score-display {
+        text-align: center;
+        font-size: 10px;
+      }
+
+      .question-number {
+        background: #667eea;
+        color: white;
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-weight: bold;
+        display: inline-block;
+        margin-bottom: 15px;
+      }
+
+      #game-canvas {
+        border-radius: 10px;
+        margin: 0 auto;
+        display: block;
+      }
+
+      .stats-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+
+      }
+
+      .character-name {
+        font-size: 20px;
+        font-weight: bold;
+        margin-bottom: 5px;
+      }
+
+      .player-name {
+        color: #10b981;
+      }
+
+      .enemy-name {
+        color: #ef4444;
+      }
+
+      .btn-next {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        border: none;
+        color: white;
+        padding: 12px 30px;
+        border-radius: 10px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.3s ease;
+      }
+
+      .btn-next:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+      }
+
+      .btn-next:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="game-container">
+      <!-- Header -->
+      <div class="header">
+        <h1><i class="fas fa-gamepad"></i>Mary Rich</h1>
+        <p class="mb-0">
+          Contesta preguntas correctamente para completar el juego !
+        </p>
+      </div>
+
+      <!-- Quiz Section -->
+      <div class="quiz-section">
+        <div class="question-number" id="questionBadge">Pregunta 1</div>
+        <h4 id="questionText" style="margin-bottom: 20px">
+          Cargando pregunta...
+        </h4>
+        <div id="optionsContainer"></div>
+        <div class="text-end mt-3">
+          <button
+            class="btn-next"
+            id="nextBtn"
+            onclick="nextQuestion()"
+            disabled
+          >
+            Siguiente <i class="fas fa-arrow-right"></i>
+          </button>
+        </div>
+      </div>
+      <!-- Stats Row -->
+      <div class="stats-row">
+        <div style="flex: 1">
+          <div class="character-name player-name">
+            <i class="fas fa-user-graduate"></i> Estudiante
+          </div>
+          <div class="health-bar-container">
+            <div class="health-bar player" id="playerHealthBar">
+              <span id="playerHealthText">100 / 100</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="score-display mx-3">
+          <div style="font-size: 0.9rem; color: #adb5bd">Pregunta</div>
+          <div
+            style="font-size: 1.5rem; font-weight: bold"
+            id="questionCounter"
+          >
+            1 / 20
+          </div>
+        </div>
+
+        <div style="flex: 1">
+          <div class="character-name enemy-name text-end">
+            Mary Rich <i class="fas fa-skull"></i>
+          </div>
+          <div class="health-bar-container">
+            <div class="health-bar enemy" id="enemyHealthBar">
+              <span id="enemyHealthText">100 / 100</span>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- Game Section -->
+      <div class="game-section">
+        <div id="game-container"></div>
+      </div>
+    </div>
+
+    <script>
+      // Variables globales
+      let currentQuestion = 0;
+      let playerHealth = 100;
+      let enemyHealth = 100;
+      let correctAnswers = 0;
+      let game;
+      let player;
+      let enemy;
+      let playerSprite;
+      let enemySprite;
+
+      // Pool de preguntas
+      const questions = [
+        {
+          question:
+            "Según la letra, qué plantearía Mary Richmond antes de intervenir en un caso?",
+          options: [
+            "Aplicar sanciones familiares",
+            "Priorizar la tecnología sobre el contacto humano",
+            "Comprender la estructura y el tejido social",
+            "Culpar al adulto mayor",
+          ],
+          correct: 2, //Correcta C
+        },
+        {
+          question: "¿Qué enfoque propone la letra inspirado en Mary Richmond?",
+          options: [
+            "Ayuda económica sin evaluación previa",
+            "Diagnóstico holístico considerando familia, redes y salud",
+            "Exclusivamente intervención individual",
+            "Delegar el cuidado en instituciones privadas",
+          ],
+          correct: 1, //Correcta B
+        },
+        {
+          question:
+            "¿Qué factor señala la letra como insuficiente para acompañar a los mayores?",
+          options: [
+            "La tecnología como sustituto del encuentro humano",
+            "La participación de la comunidad",
+            "La autonomía del adulto mayor",
+            "El apoyo de redes sociales",
+          ],
+          correct: 0, //Correcta A
+        },
+        {
+          question:
+            "¿Qué postura toma la letra sobre la soledad y el abandono en la vejez?",
+          options: [
+            "Son procesos naturales inevitables",
+            "Deben ser atendidos mediante asistencialismo",
+            "No deben existir; se deben reparar los vínculos",
+            "Se solucionan con medicación",
+          ],
+          correct: 2, //Correcta C
+        },
+        {
+          question: "¿Qué elemento critica Mary Richmond según la letra?",
+          options: [
+            "La intervención comunitaria",
+            "El asistencialismo que humilla",
+            "La construcción de redes",
+            "La autonomía personal",
+          ],
+          correct: 1, //Correcta B
+        },
+        {
+          question:
+            "¿Cómo define la letra al trabajador social inspirado en Richmond?",
+          options: [
+            "Un gestor administrativo",
+            "Un observador pasivo",
+            "Un detective de vidas",
+            "Un mediador neutral sin participación",
+          ],
+          correct: 2, //Correcta C
+        },
+        {
+          question: "¿Qué papel le da la letra al Estado?",
+          options: [
+            "Proveer tecnología avanzada",
+            "Ofrecer servicios firmes y estables",
+            "Sustituir a la familia",
+            "Evaluar moralmente a los mayores",
+          ],
+          correct: 1, //Correcta B
+        },
+      ];
+
+      // Configuración de Phaser
+      const config = {
+        type: Phaser.AUTO,
+        width: 800,
+        height: 400,
+        parent: "game-container",
+        backgroundColor: "#1a1d23",
+        scene: {
+          preload: preload,
+          create: create,
+          update: update,
+        },
+        physics: {
+          default: "arcade",
+          arcade: {
+            debug: false,
+          },
+        },
+      };
+
+      // Inicializar juego
+      window.onload = function () {
+        game = new Phaser.Game(config);
+        displayQuestion();
+      };
+
+      function preload() {
+        // Intentar cargar imágenes
+        this.load.on("loaderror", function (file) {
+          console.log("No se pudo cargar:", file.key);
+        });
+
+        this.load.image("background", "images/illinois.png");
+        this.load.image("player", "images/artigas.png");
+        this.load.image("enemy", "images/maryr.png");
+      }
+
+      function create() {
+        // Fondo
+        if (this.textures.exists("background")) {
+          const bg = this.add.image(0, 0, "background").setOrigin(0, 0);
+          bg.setDisplaySize(this.scale.width, this.scale.height);
+        } else {
+          // Fondo alternativo con patrón
+          const graphics = this.add.graphics();
+          graphics.fillGradientStyle(0x667eea, 0x667eea, 0x764ba2, 0x764ba2, 1);
+
+          // Ahora ocupa todo el canvas
+          graphics.fillRect(0, 0, this.scale.width, this.scale.height);
+        }
+
+        // Crear jugador (estudiante)
+        if (this.textures.exists("player")) {
+          playerSprite = this.add.sprite(150, 200, "player");
+          playerSprite.setScale(0.5);
+        } else {
+          // Cuadrado verde para jugador
+          const graphics = this.add.graphics();
+          graphics.fillStyle(0x10b981, 1);
+          graphics.fillRoundedRect(0, 0, 80, 80, 10);
+          graphics.generateTexture("playerShape", 80, 80);
+          playerSprite = this.add.sprite(150, 200, "playerShape");
+
+          // Agregar detalles
+          const face = this.add.graphics();
+          face.fillStyle(0xffffff, 1);
+          face.fillCircle(140, 190, 8);
+          face.fillCircle(160, 190, 8);
+          face.fillStyle(0x000000, 1);
+          face.fillCircle(140, 190, 4);
+          face.fillCircle(160, 190, 4);
+        }
+
+        // Crear enemigo (tutor)
+        if (this.textures.exists("enemy")) {
+          enemySprite = this.add.sprite(650, 200, "enemy");
+          enemySprite.setScale(0.5);
+        } else {
+          // Cuadrado rojo para enemigo
+          const graphics = this.add.graphics();
+          graphics.fillStyle(0xef4444, 1);
+          graphics.fillRoundedRect(0, 0, 80, 80, 10);
+          graphics.generateTexture("enemyShape", 80, 80);
+          enemySprite = this.add.sprite(650, 200, "enemyShape");
+
+          // Agregar detalles malvados
+          const face = this.add.graphics();
+          face.fillStyle(0xff0000, 1);
+          face.fillCircle(640, 190, 8);
+          face.fillCircle(660, 190, 8);
+        }
+
+        // Guardar referencia al juego
+        player = this;
+      }
+
+      function update() {
+        // Actualización del juego si es necesario
+      }
+
+      // Crear proyectil
+      function shootProjectile(fromX, fromY, toX, toY, color) {
+        const scene = player;
+
+        // Crear gráfico para proyectil
+        const graphics = scene.add.graphics();
+        graphics.fillStyle(color, 1);
+        graphics.fillCircle(0, 0, 10);
+        graphics.generateTexture("projectile_" + Date.now(), 20, 20);
+
+        const projectile = scene.add.sprite(
+          fromX,
+          fromY,
+          "projectile_" + Date.now()
+        );
+
+        // Animar proyectil
+        scene.tweens.add({
+          targets: projectile,
+          x: toX,
+          y: toY,
+          duration: 500,
+          ease: "Power2",
+          onComplete: () => {
+            projectile.destroy();
+            graphics.destroy();
+          },
+        });
+
+        // Efecto de disparo
+        scene.tweens.add({
+          targets: fromX < 400 ? playerSprite : enemySprite,
+          scaleX: fromX < 400 ? 0.6 : 0.4,
+          scaleY: fromX < 400 ? 0.6 : 0.4,
+          duration: 100,
+          yoyo: true,
+        });
+      }
+
+      // Animación de daño
+      function showDamage(target) {
+        const scene = player;
+
+        scene.tweens.add({
+          targets: target,
+          alpha: 0.3,
+          duration: 100,
+          yoyo: true,
+          repeat: 2,
+        });
+
+        // Shake
+        scene.tweens.add({
+          targets: target,
+          x: target.x + 10,
+          duration: 50,
+          yoyo: true,
+          repeat: 3,
+        });
+      }
+
+      // Mostrar pregunta
+      function displayQuestion() {
+        const q = questions[currentQuestion];
+
+        document.getElementById("questionBadge").textContent = `Pregunta ${
+          currentQuestion + 1
+        }`;
+        document.getElementById("questionCounter").textContent = `${
+          currentQuestion + 1
+        } / 20`;
+        document.getElementById("questionText").textContent = q.question;
+
+        const container = document.getElementById("optionsContainer");
+        container.innerHTML = "";
+
+        q.options.forEach((option, index) => {
+          const button = document.createElement("button");
+          button.className = "option-btn";
+          button.innerHTML = `<strong>${String.fromCharCode(
+            65 + index
+          )})</strong> ${option}`;
+          button.onclick = () => selectAnswer(index, button);
+          container.appendChild(button);
+        });
+
+        document.getElementById("nextBtn").disabled = true;
+      }
+
+      // Seleccionar respuesta
+      function selectAnswer(selectedIndex, button) {
+        const q = questions[currentQuestion];
+        const isCorrect = selectedIndex === q.correct;
+
+        // Deshabilitar todos los botones
+        document.querySelectorAll(".option-btn").forEach((btn) => {
+          btn.disabled = true;
+        });
+
+        // Marcar respuesta
+        button.classList.add(isCorrect ? "correct" : "incorrect");
+
+        // Marcar la correcta si se equivocó
+        if (!isCorrect) {
+          document
+            .querySelectorAll(".option-btn")
+            [q.correct].classList.add("correct");
+        }
+
+        // Ejecutar acción en el juego
+        setTimeout(() => {
+          if (isCorrect) {
+            // Jugador ataca
+            correctAnswers++;
+            shootProjectile(150, 200, 650, 200, 0x10b981);
+            setTimeout(() => {
+              enemyHealth -= 5;
+              updateHealth();
+              showDamage(enemySprite);
+
+              Swal.fire({
+                icon: "success",
+                title: "¡Correcto!",
+                text: "¡Has dañado al Tutor Oscuro!",
+                timer: 1500,
+                showConfirmButton: false,
+              });
+            }, 500);
+          } else {
+            // Enemigo ataca
+            shootProjectile(650, 200, 150, 200, 0xef4444);
+            setTimeout(() => {
+              playerHealth -= 5;
+              updateHealth();
+              showDamage(playerSprite);
+
+              Swal.fire({
+                icon: "error",
+                title: "Incorrecto",
+                text: "¡El Tutor Oscuro te ha dañado!",
+                timer: 1500,
+                showConfirmButton: false,
+              });
+            }, 500);
+          }
+        }, 500);
+
+        // Habilitar botón siguiente
+        document.getElementById("nextBtn").disabled = false;
+      }
+
+      // Actualizar barras de vida
+      function updateHealth() {
+        const playerBar = document.getElementById("playerHealthBar");
+        const enemyBar = document.getElementById("enemyHealthBar");
+        const playerText = document.getElementById("playerHealthText");
+        const enemyText = document.getElementById("enemyHealthText");
+
+        playerBar.style.width = `${playerHealth}%`;
+        enemyBar.style.width = `${enemyHealth}%`;
+
+        playerText.textContent = `${playerHealth} / 100`;
+        enemyText.textContent = `${enemyHealth} / 100`;
+
+        // Verificar fin del juego
+        if (enemyHealth <= 0) {
+          setTimeout(endGame, 1000);
+        }
+      }
+
+      // Siguiente pregunta
+      function nextQuestion() {
+        currentQuestion++;
+
+        if (currentQuestion < questions.length) {
+          displayQuestion();
+        } else {
+          endGame();
+        }
+      }
+
+      // Fin del juego
+      function endGame() {
+        const victory = enemyHealth <= 0;
+        const percentage = (correctAnswers / questions.length) * 100;
+
+        // Efecto final
+        if (victory) {
+          const scene = player;
+          scene.tweens.add({
+            targets: enemySprite,
+            alpha: 0,
+            angle: 360,
+            scale: 0,
+            duration: 1000,
+          });
+        }
+
+        setTimeout(() => {
+          Swal.fire({
+            icon: victory ? "success" : "info",
+            title: victory ? "¡Victoria!" : "¡Juego Terminado!",
+            html: `
+                        <h3>${
+                          victory
+                            ? "¡Has derrotado al Tutor Oscuro Fernando!"
+                            : "¡El juego ha terminado!"
+                        }</h3>
+                        <p><strong>Puntaje:</strong> ${correctAnswers} / ${
+              questions.length
+            }</p>
+                        <p><strong>Porcentaje:</strong> ${percentage.toFixed(
+                          1
+                        )}%</p>
+                        <p><strong>Tu salud final:</strong> ${playerHealth}</p>
+                        <p><strong>Salud del enemigo:</strong> ${enemyHealth}</p>
+                        ${
+                          victory
+                            ? '<p class="text-success">🎉 ¡Excelente trabajo, estudiante valiente!</p>'
+                            : ""
+                        }
+                    `,
+            confirmButtonText: "Jugar de nuevo",
+            confirmButtonColor: "#667eea",
+          }).then(() => {
+            location.reload();
+          });
+        }, 1000);
+      }
+    </script>
+  </body>
+</html>
