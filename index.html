@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Mary Rich</title>
+    <title> Mary Ellen Richmond</title>
     <link
       href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.0/css/bootstrap.min.css"
       rel="stylesheet"
@@ -18,6 +18,7 @@
       body {
         background: linear-gradient(135deg, #1a1d23 0%, #2d3139 100%);
         color: white;
+        font-size: 12px;
         font-family: "Segoe UI", Tahoma, Geneva, Verdana, sans-serif;
         margin: 0;
         padding: 0;
@@ -31,7 +32,17 @@
 
       canvas {
         width: 100% !important;
-        height: auto !important;
+        height: 400px
+      }
+
+      .h1 {
+        font-size: 16px;
+        font-weight: bold;
+      }
+
+      .h4 {
+        font-size: 12px;
+        font-weight: bold;
       }
 
       .header {
@@ -59,6 +70,12 @@
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.5);
       }
 
+
+      .btn-next {
+        margin-bottom: 15px;
+        margin-left: 850px;
+      }
+
       .option-btn {
         background: #2d3139;
         border: 2px solid #667eea;
@@ -70,7 +87,7 @@
         transition: all 0.3s ease;
         width: 100%;
         text-align: left;
-        font-size: 1rem;
+        font-size: 15px;
       }
 
       .option-btn:hover:not(:disabled) {
@@ -110,7 +127,7 @@
         align-items: center;
         justify-content: center;
         font-weight: bold;
-        font-size: 15px;
+        font-size: 12px;
       }
 
       .health-bar.player {
@@ -146,11 +163,10 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-
       }
 
       .character-name {
-        font-size: 20px;
+        font-size: 16px;
         font-weight: bold;
         margin-bottom: 5px;
       }
@@ -189,7 +205,7 @@
     <div class="game-container">
       <!-- Header -->
       <div class="header">
-        <h1><i class="fas fa-gamepad"></i>Mary Rich</h1>
+        <h1><i class="fas fa-gamepad"></i> Mary Ellen Richmond</h1>
         <p class="mb-0">
           Contesta preguntas correctamente para completar el juego !
         </p>
@@ -197,21 +213,19 @@
 
       <!-- Quiz Section -->
       <div class="quiz-section">
-        <div class="question-number" id="questionBadge">Pregunta 1</div>
-        <h4 id="questionText" style="margin-bottom: 20px">
-          Cargando pregunta...
-        </h4>
-        <div id="optionsContainer"></div>
-        <div class="text-end mt-3">
-          <button
+        <div class="question-number" id="questionBadge">Pregunta 1 </div>
+        <button
             class="btn-next"
             id="nextBtn"
             onclick="nextQuestion()"
             disabled
           >
-            Siguiente <i class="fas fa-arrow-right"></i>
-          </button>
-        </div>
+            Siguiente Pregunta
+        </button>
+        <h4 id="questionText" style="margin-bottom: 20px">
+          Cargando pregunta...
+        </h4>
+        <div id="optionsContainer"></div>
       </div>
       <!-- Stats Row -->
       <div class="stats-row">
@@ -227,18 +241,18 @@
         </div>
 
         <div class="score-display mx-3">
-          <div style="font-size: 0.9rem; color: #adb5bd">Pregunta</div>
+          <div style="font-size: 12px; color: #adb5bd">Pregunta</div>
           <div
-            style="font-size: 1.5rem; font-weight: bold"
+            style="font-size: 20px; font-weight: bold"
             id="questionCounter"
           >
-            1 / 20
+            1 / 10
           </div>
         </div>
 
         <div style="flex: 1">
           <div class="character-name enemy-name text-end">
-            Mary Rich <i class="fas fa-skull"></i>
+             Mary Ellen Richmond <i class="fas fa-skull"></i>
           </div>
           <div class="health-bar-container">
             <div class="health-bar enemy" id="enemyHealthBar">
@@ -280,6 +294,17 @@
           correct: 2, //Correcta C
         },
         {
+          question:
+            "¿En qué organización comenzó Mary Richmond su labor profesional?",
+          options: [
+            "Charity Organization Society (COS)",
+            "Cruz Roja",
+            "ONU",
+            "UNICEF",
+          ],
+          correct: 0, // Correcta A
+        },
+        {
           question: "¿Qué enfoque propone la letra inspirado en Mary Richmond?",
           options: [
             "Ayuda económica sin evaluación previa",
@@ -288,6 +313,28 @@
             "Delegar el cuidado en instituciones privadas",
           ],
           correct: 1, //Correcta B
+        },
+        {
+          question:
+            "¿Cuál es una de las principales obras escritas por Mary Richmond?",
+          options: [
+            "Social Diagnosis",
+            "El contrato social",
+            "La teoría general de sistemas",
+            "La ética protestante",
+          ],
+          correct: 0, // Correcta A
+        },
+        {
+          question:
+            "¿Qué concepto fundamental desarrolló Mary Richmond en el trabajo social?",
+          options: [
+            "Psicoanálisis",
+            "Terapia cognitiva",
+            "Diagnóstico social",
+            "Economía solidaria",
+          ],
+          correct: 2, // Correcta C
         },
         {
           question:
@@ -377,8 +424,8 @@
         });
 
         this.load.image("background", "images/illinois.png");
-        this.load.image("player", "images/artigas.png");
-        this.load.image("enemy", "images/maryr.png");
+        this.load.image("player", "images/pngwing.png");
+        this.load.image("enemy", "images/me16fo01-removebg-preview.png");
       }
 
       function create() {
@@ -397,8 +444,8 @@
 
         // Crear jugador (estudiante)
         if (this.textures.exists("player")) {
-          playerSprite = this.add.sprite(150, 200, "player");
-          playerSprite.setScale(0.5);
+          playerSprite = this.add.sprite(200, 300, "player");
+          playerSprite.setScale(0.3, 0.4);
         } else {
           // Cuadrado verde para jugador
           const graphics = this.add.graphics();
@@ -419,8 +466,8 @@
 
         // Crear enemigo (tutor)
         if (this.textures.exists("enemy")) {
-          enemySprite = this.add.sprite(650, 200, "enemy");
-          enemySprite.setScale(0.5);
+          enemySprite = this.add.sprite(650, 300, "enemy");
+          enemySprite.setScale(0.8);
         } else {
           // Cuadrado rojo para enemigo
           const graphics = this.add.graphics();
@@ -514,7 +561,7 @@
         }`;
         document.getElementById("questionCounter").textContent = `${
           currentQuestion + 1
-        } / 20`;
+        } / 10`;
         document.getElementById("questionText").textContent = q.question;
 
         const container = document.getElementById("optionsContainer");
@@ -560,7 +607,7 @@
             correctAnswers++;
             shootProjectile(150, 200, 650, 200, 0x10b981);
             setTimeout(() => {
-              enemyHealth -= 5;
+              enemyHealth -= 10;
               updateHealth();
               showDamage(enemySprite);
 
@@ -576,7 +623,7 @@
             // Enemigo ataca
             shootProjectile(650, 200, 150, 200, 0xef4444);
             setTimeout(() => {
-              playerHealth -= 5;
+              playerHealth -= 10;
               updateHealth();
               showDamage(playerSprite);
 
@@ -649,7 +696,7 @@
             html: `
                         <h3>${
                           victory
-                            ? "¡Has derrotado al Tutor Oscuro Fernando!"
+                            ? "¡Has completado el desafío!"
                             : "¡El juego ha terminado!"
                         }</h3>
                         <p><strong>Puntaje:</strong> ${correctAnswers} / ${
@@ -662,7 +709,7 @@
                         <p><strong>Salud del enemigo:</strong> ${enemyHealth}</p>
                         ${
                           victory
-                            ? '<p class="text-success">🎉 ¡Excelente trabajo, estudiante valiente!</p>'
+                            ? '<p class="text-success">🎉 ¡Excelente trabajo!</p>'
                             : ""
                         }
                     `,
